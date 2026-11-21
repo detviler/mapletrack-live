@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-21T00:49:03.816314+00:00",
+  "updatedAt": "2026-11-21T03:10:53.563658+00:00",
   "items": [
     {
       "id": "bb-mk-13-black",
@@ -10,7 +10,7 @@
       "targetPrice": 320.0,
       "inStock": false,
       "status": "ok",
-      "lastChecked": "2026-11-21T00:49:03.816314+00:00",
+      "lastChecked": "2026-11-21T03:10:53.563658+00:00",
       "history": [
         {
           "date": "2026-11-21T00:49:03.816314+00:00",
@@ -27,7 +27,7 @@
       "targetPrice": 350.0,
       "inStock": false,
       "status": "ok",
-      "lastChecked": "2026-11-21T00:49:03.816314+00:00",
+      "lastChecked": "2026-11-21T03:10:53.563658+00:00",
       "history": [
         {
           "date": "2026-11-21T00:49:03.816314+00:00",
@@ -44,19 +44,19 @@
       "targetPrice": 110.0,
       "inStock": false,
       "status": "error: HTTPError",
-      "lastChecked": "2026-11-21T00:49:03.816314+00:00",
+      "lastChecked": "2026-11-21T03:10:53.563658+00:00",
       "history": []
     },
     {
-      "id": "uniqlo-sample",
-      "name": "Uniqlo Sample Item",
+      "id": "uniqlo-warm-lined-pants-xs",
+      "name": "Uniqlo Warm Lined Pants (Dark Green, XS)",
       "retailer": "uniqlo_ca",
       "url": "",
       "currentPrice": null,
-      "targetPrice": 39.9,
+      "targetPrice": 59.9,
       "inStock": false,
       "status": "error: HTTPError",
-      "lastChecked": "2026-11-21T00:49:03.816314+00:00",
+      "lastChecked": "2026-11-21T03:10:53.563658+00:00",
       "history": []
     }
   ]
