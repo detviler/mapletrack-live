@@ -21,10 +21,11 @@
     "targetPrice": 110.00
   },
   {
-    "id": "uniqlo-sample",
-    "name": "Uniqlo Sample Item",
+     "id": "uniqlo-warm-lined-pants-xs",
+    "name": "Uniqlo Warm Lined Pants (Dark Green, XS)",
     "retailer": "uniqlo_ca",
-    "productId": "E465185-000",
-    "targetPrice": 39.90
+    "productId": "E487261-000",
+    "targetPrice": 59.90
+    
   }
 ]
