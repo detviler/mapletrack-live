@@ -1,0 +1,63 @@
+{
+  "updatedAt": "2026-11-21T00:49:03.816314+00:00",
+  "items": [
+    {
+      "id": "bb-mk-13-black",
+      "name": "Apple Magic Keyboard 13-inch iPad Pro (Refurbished)",
+      "retailer": "bestbuy_ca",
+      "url": "https://www.bestbuy.ca/en-ca/product/19184599",
+      "currentPrice": 299.99,
+      "targetPrice": 320.0,
+      "inStock": false,
+      "status": "ok",
+      "lastChecked": "2026-11-21T00:49:03.816314+00:00",
+      "history": [
+        {
+          "date": "2026-11-21T00:49:03.816314+00:00",
+          "price": 299.99
+        }
+      ]
+    },
+    {
+      "id": "bb-mk-13-alt",
+      "name": "Apple Magic Keyboard 13-inch iPad Pro (Open Box)",
+      "retailer": "bestbuy_ca",
+      "url": "https://www.bestbuy.ca/en-ca/product/18145549",
+      "currentPrice": 329.99,
+      "targetPrice": 350.0,
+      "inStock": false,
+      "status": "ok",
+      "lastChecked": "2026-11-21T00:49:03.816314+00:00",
+      "history": [
+        {
+          "date": "2026-11-21T00:49:03.816314+00:00",
+          "price": 329.99
+        }
+      ]
+    },
+    {
+      "id": "fb-sample",
+      "name": "FragranceBuy Sample",
+      "retailer": "fragrancebuy_ca",
+      "url": "https://fragrancebuy.ca/products/prada-lhomme-man",
+      "currentPrice": null,
+      "targetPrice": 110.0,
+      "inStock": false,
+      "status": "error: HTTPError",
+      "lastChecked": "2026-11-21T00:49:03.816314+00:00",
+      "history": []
+    },
+    {
+      "id": "uniqlo-sample",
+      "name": "Uniqlo Sample Item",
+      "retailer": "uniqlo_ca",
+      "url": "",
+      "currentPrice": null,
+      "targetPrice": 39.9,
+      "inStock": false,
+      "status": "error: HTTPError",
+      "lastChecked": "2026-11-21T00:49:03.816314+00:00",
+      "history": []
+    }
+  ]
+}
