@@ -124,7 +124,7 @@ def main():
                 price, in_stock, product_url = check_fragrancebuy_ca(item["url"])
             elif retailer == "uniqlo_ca":
                 price, in_stock, product_url = check_uniqlo_ca(item["productId"])
-                        except Exception as e:
+        except Exception as e:
             print(f"Failed checking {item_id}: {e}")
             if retailer == "uniqlo_ca" and not product_url:
                 product_url = f"https://www.uniqlo.com/ca/en/products/{item['productId']}/00"
