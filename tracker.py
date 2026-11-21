@@ -2,6 +2,7 @@ import json
 import os
 from datetime import datetime, timezone
 import requests
+from curl_cffi import requests as cffi_requests
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
@@ -60,26 +61,38 @@ def check_fragrancebuy_ca(product_url):
 
 
 def check_uniqlo_ca(product_id):
-    # Uniqlo Canada commerce API endpoint (e.g., productId like E465185-000)
-    url = f"https://www.uniqlo.com/ca/api/commerce/v3/en/products/{product_id}"
-    resp = requests.get(url, headers=HEADERS, timeout=15)
+    base_url = f"https://www.uniqlo.com/ca/api/commerce/v5/en/products/{product_id}/price-groups/00"
+    product_url = f"https://www.uniqlo.com/ca/en/products/{product_id}/00"
+    uniqlo_headers = {
+        "Accept": "application/json, text/plain, */*",
+        "Referer": product_url,
+        "x-fr-clientid": "uq.ca.web-spa",
+    }
+    resp = cffi_requests.get(
+        f"{base_url}/details",
+        headers=uniqlo_headers,
+        impersonate="chrome",
+        timeout=15,
+    )
     resp.raise_for_status()
-    items = resp.json().get("result", {}).get("items", [])
+    result = resp.json().get("result", {})
 
-    if not items:
-        return None, False, f"https://www.uniqlo.com/ca/en/products/{product_id}"
+    prices = result.get("prices", {})
+    if not prices and result.get("l2s"):
+        prices = result["l2s"][0].get("prices", {})
+    promo = prices.get("promo") or {}
+    base = prices.get("base") or {}
+    raw_price = promo.get("value") if promo.get("value") is not None else base.get("value")
+    price = float(raw_price) if raw_price is not None else None
 
-    item = items[0]
-    prices = item.get("prices", {})
-    promo = prices.get("promo")
-    base = prices.get("base")
-    price = float(promo["value"]) if promo and promo.get("value") else float(base["value"])
+    l2s = result.get("l2s", [])
     in_stock = any(
         sku.get("stock", {}).get("statusCode") in ("IN_STOCK", "LOW_STOCK")
-        for sku in item.get("l2s", [])
-    )
-    product_url = f"https://www.uniqlo.com/ca/en/products/{product_id}"
+        for sku in l2s
+    ) if l2s else (price is not None)
+
     return price, in_stock, product_url
+
 
 
 def main():
@@ -111,9 +124,12 @@ def main():
                 price, in_stock, product_url = check_fragrancebuy_ca(item["url"])
             elif retailer == "uniqlo_ca":
                 price, in_stock, product_url = check_uniqlo_ca(item["productId"])
-        except Exception as e:
+                        except Exception as e:
             print(f"Failed checking {item_id}: {e}")
-            status = f"error: {type(e).__name__}"
+            if retailer == "uniqlo_ca" and not product_url:
+                product_url = f"https://www.uniqlo.com/ca/en/products/{item['productId']}/00"
+            status = f"error: {e}"
+
 
         if price is not None:
             if not history or history[-1]["price"] != price:
