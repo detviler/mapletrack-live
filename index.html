@@ -1,0 +1,1758 @@
+<!DOCTYPE html>
+<html lang="en" class="antialiased">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MapleTrack — Canadian Price & Stock Tracker (CAD)</title>
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+          },
+        },
+      },
+    };
+  </script>
+
+  <!-- Chart.js CDN for detailed price history modal -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+
+<body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 font-sans min-h-screen transition-colors duration-200 selection:bg-indigo-500 selection:text-white">
+
+  <!-- ==================== TOP NAVIGATION HEADER ==================== -->
+  <header class="sticky top-0 z-30 bg-white/85 dark:bg-slate-900/85 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <!-- Brand Logo & Title -->
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/20 shrink-0">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+            </svg>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h1 class="text-lg sm:text-xl font-bold tracking-tight text-slate-900 dark:text-white">MapleTrack</h1>
+              <span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold bg-rose-50 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300 border border-rose-200/70 dark:border-rose-500/20">
+                🇨🇦 CAD
+              </span>
+            </div>
+            <p class="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">Canadian Price &amp; Restock Watchlist</p>
+          </div>
+        </div>
+
+        <!-- Header Action Buttons -->
+        <div class="flex items-center gap-2 sm:gap-2.5">
+          <!-- Live Feed Sync Button -->
+          <button
+            id="btn-open-sync"
+            type="button"
+            class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium bg-slate-100 hover:bg-slate-200/80 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200/80 dark:border-slate-700 transition cursor-pointer"
+            title="Live Feed Sync & JSON Backup"
+          >
+            <svg class="w-4 h-4 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+            </svg>
+            <span class="hidden md:inline">Live Sync</span>
+          </button>
+
+          <!-- Reset Demo Data Button -->
+          <button
+            id="btn-reset-demo"
+            type="button"
+            class="inline-flex items-center justify-center p-2 sm:px-3 sm:py-2 rounded-xl text-sm font-medium bg-slate-100 hover:bg-slate-200/80 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700 transition cursor-pointer"
+            title="Reset to Demo Items"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
+            </svg>
+            <span class="hidden lg:inline ml-1.5">Reset Demo</span>
+          </button>
+
+          <!-- Dark Mode Toggle -->
+          <button
+            id="btn-theme-toggle"
+            type="button"
+            class="inline-flex items-center justify-center p-2 rounded-xl bg-slate-100 hover:bg-slate-200/80 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700 transition cursor-pointer"
+            title="Toggle Dark / Light Theme"
+            aria-label="Toggle Theme"
+          >
+            <!-- Sun Icon (shown in dark mode) -->
+            <svg id="icon-sun" class="w-4 h-4 hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+            </svg>
+            <!-- Moon Icon (shown in light mode) -->
+            <svg id="icon-moon" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
+            </svg>
+          </button>
+
+          <!-- Add Product Primary CTA -->
+          <button
+            id="btn-add-product"
+            type="button"
+            class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-sm font-semibold bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] text-white shadow-sm shadow-indigo-500/25 transition cursor-pointer"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            <span>Add Item</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ==================== MAIN CONTENT CONTAINER ==================== -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
+
+    <!-- ==================== KPI SUMMARY BAR ==================== -->
+    <section aria-label="Dashboard Summary" class="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
+      <!-- KPI 1: Total Tracked -->
+      <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-5 border border-slate-200/80 dark:border-slate-800 shadow-sm">
+        <div class="flex items-center justify-between">
+          <span class="text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400">Total Tracked</span>
+          <span class="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+            </svg>
+          </span>
+        </div>
+        <div class="mt-2.5 flex items-baseline gap-2">
+          <span id="kpi-total" class="text-2xl sm:text-3xl font-bold tracking-tight">0</span>
+          <span id="kpi-stores-count" class="text-xs text-slate-500 dark:text-slate-400">across 0 stores</span>
+        </div>
+      </div>
+
+      <!-- KPI 2: Deals Hit -->
+      <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-5 border border-slate-200/80 dark:border-slate-800 shadow-sm">
+        <div class="flex items-center justify-between">
+          <span class="text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400">Deals Hit</span>
+          <span class="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6z" />
+            </svg>
+          </span>
+        </div>
+        <div class="mt-2.5 flex items-baseline gap-2">
+          <span id="kpi-deals" class="text-2xl sm:text-3xl font-bold tracking-tight text-emerald-600 dark:text-emerald-400">0</span>
+          <span class="text-xs text-slate-500 dark:text-slate-400">at or below target</span>
+        </div>
+      </div>
+
+      <!-- KPI 3: In Stock Count -->
+      <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-5 border border-slate-200/80 dark:border-slate-800 shadow-sm">
+        <div class="flex items-center justify-between">
+          <span class="text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400">In Stock</span>
+          <span class="w-8 h-8 rounded-lg bg-sky-50 dark:bg-sky-500/15 text-sky-600 dark:text-sky-400 flex items-center justify-center">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </span>
+        </div>
+        <div class="mt-2.5 flex items-baseline gap-2">
+          <span id="kpi-instock" class="text-2xl sm:text-3xl font-bold tracking-tight">0</span>
+          <span id="kpi-instock-sub" class="text-xs text-slate-500 dark:text-slate-400">available now</span>
+        </div>
+      </div>
+
+      <!-- KPI 4: Avg. Discount Needed to Hit Target -->
+      <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-5 border border-slate-200/80 dark:border-slate-800 shadow-sm">
+        <div class="flex items-center justify-between">
+          <span class="text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400">Avg. Drop to Target</span>
+          <span class="w-8 h-8 rounded-lg bg-amber-50 dark:bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6L9 12.75l4.286-4.286a11.948 11.948 0 014.306 6.43l.776 2.898m0 0l3.182-5.511m-3.182 5.51l-5.511-3.181" />
+            </svg>
+          </span>
+        </div>
+        <div class="mt-2.5 flex items-baseline gap-2">
+          <span id="kpi-avg-discount" class="text-2xl sm:text-3xl font-bold tracking-tight">0%</span>
+          <span id="kpi-avg-cad" class="text-xs text-slate-500 dark:text-slate-400">avg gap</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== FILTER PILLS, SEARCH & SORT BAR ==================== -->
+    <section class="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-3.5">
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3.5">
+        <!-- Store Filter Pills -->
+        <div id="store-filter-pills" class="flex flex-wrap items-center gap-2" role="tablist" aria-label="Filter by store">
+          <!-- Dynamically populated by JS -->
+        </div>
+
+        <!-- Search & Sort Controls -->
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full lg:w-auto">
+          <!-- Search Input -->
+          <div class="relative flex-1 sm:w-64">
+            <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+            </svg>
+            <input
+              id="search-input"
+              type="text"
+              placeholder="Search item, SKU, notes..."
+              class="w-full pl-9 pr-3.5 py-2 rounded-xl text-sm bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 transition"
+            />
+          </div>
+
+          <!-- Sort Dropdown -->
+          <select
+            id="sort-select"
+            aria-label="Sort products"
+            class="px-3.5 py-2 rounded-xl text-sm bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 transition cursor-pointer"
+          >
+            <option value="updated">Sort: Recently Updated</option>
+            <option value="closest">Sort: Closest to Target</option>
+            <option value="price-asc">Sort: Price Low → High</option>
+            <option value="price-desc">Sort: Price High → Low</option>
+            <option value="name">Sort: Name (A–Z)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Subtle Sync Status Footer inside Filter Bar (visible if feed URL configured) -->
+      <div id="sync-status-banner" class="hidden pt-2.5 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500 dark:text-slate-400">
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span>Live Feed connected: <strong id="sync-banner-url" class="font-medium text-slate-700 dark:text-slate-300 break-all"></strong></span>
+        </div>
+        <div class="flex items-center gap-3">
+          <span id="sync-banner-time">Never synced</span>
+          <button id="btn-quick-sync" type="button" class="text-indigo-600 dark:text-indigo-400 hover:underline font-semibold cursor-pointer">Refresh Now</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== PRODUCT CARDS GRID ==================== -->
+    <section id="products-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5" aria-live="polite">
+      <!-- Product cards rendered here via JS -->
+    </section>
+
+    <!-- ==================== EMPTY STATE ==================== -->
+    <section id="empty-state" class="hidden bg-white dark:bg-slate-900 rounded-2xl p-10 text-center border border-dashed border-slate-300 dark:border-slate-700">
+      <div class="w-12 h-12 mx-auto rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 mb-3">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+        </svg>
+      </div>
+      <h3 class="text-base font-semibold text-slate-900 dark:text-white">No matching items found</h3>
+      <p class="text-sm text-slate-500 dark:text-slate-400 mt-1 max-w-sm mx-auto">Try adjusting your store filter or search query, or add a new Canadian product to track.</p>
+      <div class="mt-4 flex items-center justify-center gap-2.5">
+        <button id="btn-clear-filters" type="button" class="px-4 py-2 rounded-xl text-sm font-medium bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition cursor-pointer">
+          Clear Filters
+        </button>
+        <button id="btn-empty-add" type="button" class="px-4 py-2 rounded-xl text-sm font-semibold bg-indigo-600 hover:bg-indigo-700 text-white transition cursor-pointer">
+          + Add Item
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <!-- ==================== MODAL 1: ADD / EDIT PRODUCT ==================== -->
+  <div id="modal-product" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm overflow-y-auto">
+    <div class="bg-white dark:bg-slate-900 w-full max-w-lg rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden my-auto">
+      <div class="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-800">
+        <h2 id="modal-product-title" class="text-lg font-bold">Add Product to Track</h2>
+        <button data-close-modal="modal-product" type="button" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer" aria-label="Close modal">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
+      </div>
+
+      <form id="form-product" class="p-5 space-y-4">
+        <input type="hidden" id="prod-id" />
+
+        <div>
+          <label for="prod-name" class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">Product Name *</label>
+          <input id="prod-name" type="text" required placeholder="e.g., Apple Magic Keyboard 13&quot; (M4) Refurbished" class="w-full px-3.5 py-2.5 rounded-xl text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500" />
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <div>
+            <label for="prod-store" class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">Store *</label>
+            <select id="prod-store" required class="w-full px-3.5 py-2.5 rounded-xl text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500">
+              <option value="Best Buy Canada">Best Buy Canada</option>
+              <option value="FragranceBuy.ca">FragranceBuy.ca</option>
+              <option value="Uniqlo Canada">Uniqlo Canada</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div>
+            <label for="prod-sku" class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">SKU / Product ID</label>
+            <input id="prod-sku" type="text" placeholder="e.g., 19184599" class="w-full px-3.5 py-2.5 rounded-xl text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500" />
+          </div>
+        </div>
+
+        <div>
+          <label for="prod-url" class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">Listing URL *</label>
+          <input id="prod-url" type="url" required placeholder="https://www.bestbuy.ca/en-ca/product/..." class="w-full px-3.5 py-2.5 rounded-xl text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500" />
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+          <div>
+            <label for="prod-current-price" class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">Current (CAD) *</label>
+            <input id="prod-current-price" type="number" step="0.01" min="0" required placeholder="349.99" class="w-full px-3.5 py-2.5 rounded-xl text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500" />
+          </div>
+          <div>
+            <label for="prod-target-price" class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">Target (CAD) *</label>
+            <input id="prod-target-price" type="number" step="0.01" min="0" required placeholder="299.99" class="w-full px-3.5 py-2.5 rounded-xl text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500" />
+          </div>
+          <div>
+            <label for="prod-status" class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">Stock Status *</label>
+            <select id="prod-status" required class="w-full px-3.5 py-2.5 rounded-xl text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500">
+              <option value="In Stock">In Stock</option>
+              <option value="Out of Stock">Out of Stock</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label for="prod-notes" class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">Condition / Variant Notes</label>
+          <input id="prod-notes" type="text" placeholder="e.g., Refurbished (Good), English Black, 100ml EDP" class="w-full px-3.5 py-2.5 rounded-xl text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500" />
+        </div>
+
+        <div class="flex items-center justify-end gap-2.5 pt-2">
+          <button data-close-modal="modal-product" type="button" class="px-4 py-2.5 rounded-xl text-sm font-medium bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition cursor-pointer">
+            Cancel
+          </button>
+          <button type="submit" class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm shadow-indigo-500/25 transition cursor-pointer">
+            Save Product
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL 2: QUICK UPDATE PRICE / STOCK ==================== -->
+  <div id="modal-quick-log" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm overflow-y-auto">
+    <div class="bg-white dark:bg-slate-900 w-full max-w-md rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden my-auto">
+      <div class="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-800">
+        <div>
+          <h2 class="text-base font-bold">Log Price / Stock Update</h2>
+          <p id="quick-log-subtitle" class="text-xs text-slate-500 dark:text-slate-400 truncate max-w-xs mt-0.5"></p>
+        </div>
+        <button data-close-modal="modal-quick-log" type="button" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer" aria-label="Close modal">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
+      </div>
+
+      <form id="form-quick-log" class="p-5 space-y-4">
+        <input type="hidden" id="quick-log-id" />
+        <div class="grid grid-cols-2 gap-3.5">
+          <div>
+            <label for="quick-log-price" class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">New Price (CAD) *</label>
+            <input id="quick-log-price" type="number" step="0.01" min="0" required class="w-full px-3.5 py-2.5 rounded-xl text-sm font-semibold bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500" />
+          </div>
+          <div>
+            <label for="quick-log-status" class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">Stock Status *</label>
+            <select id="quick-log-status" required class="w-full px-3.5 py-2.5 rounded-xl text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500">
+              <option value="In Stock">In Stock</option>
+              <option value="Out of Stock">Out of Stock</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label for="quick-log-note" class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">Log Note (Optional)</label>
+          <input id="quick-log-note" type="text" placeholder="e.g., Weekend flash sale, restocked 2 units" class="w-full px-3.5 py-2.5 rounded-xl text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500" />
+        </div>
+        <div class="flex items-center justify-end gap-2.5 pt-2">
+          <button data-close-modal="modal-quick-log" type="button" class="px-4 py-2.5 rounded-xl text-sm font-medium bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition cursor-pointer">
+            Cancel
+          </button>
+          <button type="submit" class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm transition cursor-pointer">
+            Log Entry
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL 3: PRICE HISTORY CHART & LOGS ==================== -->
+  <div id="modal-history" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm overflow-y-auto">
+    <div class="bg-white dark:bg-slate-900 w-full max-w-2xl rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden my-auto">
+      <div class="flex items-start justify-between gap-4 px-5 py-4 border-b border-slate-200 dark:border-slate-800">
+        <div>
+          <div class="flex items-center gap-2">
+            <span id="history-store-badge" class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold"></span>
+            <span id="history-sku-badge" class="text-xs text-slate-500 dark:text-slate-400 font-mono"></span>
+          </div>
+          <h2 id="history-title" class="text-lg font-bold mt-1 leading-snug">Price History</h2>
+        </div>
+        <button data-close-modal="modal-history" type="button" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer shrink-0" aria-label="Close modal">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
+      </div>
+
+      <div class="p-5 space-y-5 max-h-[80vh] overflow-y-auto">
+        <!-- Quick Stats Strip -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200/70 dark:border-slate-700/70">
+            <div class="text-xs text-slate-500 dark:text-slate-400">Current</div>
+            <div id="hist-stat-current" class="text-base font-bold mt-0.5">$0.00</div>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200/70 dark:border-slate-700/70">
+            <div class="text-xs text-slate-500 dark:text-slate-400">Target</div>
+            <div id="hist-stat-target" class="text-base font-bold text-indigo-600 dark:text-indigo-400 mt-0.5">$0.00</div>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200/70 dark:border-slate-700/70">
+            <div class="text-xs text-slate-500 dark:text-slate-400">Lowest Seen</div>
+            <div id="hist-stat-low" class="text-base font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">$0.00</div>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200/70 dark:border-slate-700/70">
+            <div class="text-xs text-slate-500 dark:text-slate-400">Highest Seen</div>
+            <div id="hist-stat-high" class="text-base font-bold text-rose-600 dark:text-rose-400 mt-0.5">$0.00</div>
+          </div>
+        </div>
+
+        <!-- Chart.js Container -->
+        <div class="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-3.5 border border-slate-200/70 dark:border-slate-700/70">
+          <div class="relative h-56 w-full">
+            <canvas id="history-chart"></canvas>
+          </div>
+        </div>
+
+        <!-- Timestamped Log Entries -->
+        <div>
+          <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2.5">Timestamped Log Entries</h3>
+          <div id="history-log-list" class="divide-y divide-slate-100 dark:divide-slate-800 border border-slate-200/80 dark:border-slate-800 rounded-xl overflow-hidden">
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL 4: LIVE FEED SYNC & BACKUP ==================== -->
+  <div id="modal-sync" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm overflow-y-auto">
+    <div class="bg-white dark:bg-slate-900 w-full max-w-xl rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden my-auto">
+      <div class="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-800">
+        <div>
+          <h2 class="text-lg font-bold">Live Feed Sync &amp; JSON Backup</h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Connect an automated GitHub Action, webhook, or Cloudflare Worker JSON feed</p>
+        </div>
+        <button data-close-modal="modal-sync" type="button" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer" aria-label="Close modal">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
+      </div>
+
+      <div class="p-5 space-y-5 max-h-[80vh] overflow-y-auto">
+        <!-- Section A: Remote JSON Feed URL -->
+        <div class="space-y-3">
+          <label for="sync-feed-url" class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Remote JSON Feed URL</label>
+          <div class="flex flex-col sm:flex-row gap-2">
+            <input
+              id="sync-feed-url"
+              type="url"
+              placeholder="https://raw.githubusercontent.com/user/repo/main/prices.json"
+              class="flex-1 px-3.5 py-2.5 rounded-xl text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500"
+            />
+            <button id="btn-run-sync" type="button" class="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-semibold bg-indigo-600 hover:bg-indigo-700 text-white transition cursor-pointer shrink-0">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+              </svg>
+              Sync Now
+            </button>
+          </div>
+          <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+            Matching items (by <code class="px-1 py-0.5 rounded bg-slate-100 dark:bg-slate-800">sku</code>, <code class="px-1 py-0.5 rounded bg-slate-100 dark:bg-slate-800">url</code>, or <code class="px-1 py-0.5 rounded bg-slate-100 dark:bg-slate-800">id</code>) will automatically log a new price/stock entry if changed. New items in the feed will be added.
+          </p>
+        </div>
+
+        <!-- Sample JSON Schema Preview -->
+        <div class="bg-slate-50 dark:bg-slate-800/60 rounded-xl p-3.5 border border-slate-200 dark:border-slate-700/80 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold text-slate-600 dark:text-slate-300">Expected JSON Feed Format</span>
+            <button id="btn-copy-schema" type="button" class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer">Copy Sample JSON</button>
+          </div>
+          <pre id="sample-schema-code" class="text-xs font-mono text-slate-600 dark:text-slate-300 overflow-x-auto leading-relaxed">[
+  {
+    "sku": "19184599",
+    "currentPrice": 289.99,
+    "status": "In Stock",
+    "note": "Auto-checked via GitHub Action"
+  }
+]</pre>
+        </div>
+
+        <!-- Divider -->
+        <div class="border-t border-slate-200 dark:border-slate-800 pt-4 space-y-3">
+          <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Local Backup &amp; Restore</h3>
+          <div class="flex flex-wrap items-center gap-2.5">
+            <button id="btn-export-json" type="button" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 transition cursor-pointer">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
+              Export JSON Backup
+            </button>
+
+            <label class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 transition cursor-pointer">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" /></svg>
+              Import JSON File
+              <input id="input-import-json" type="file" accept=".json,application/json" class="hidden" />
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL 5: CUSTOM CONFIRMATION DIALOG ==================== -->
+  <div id="modal-confirm" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm">
+    <div class="bg-white dark:bg-slate-900 w-full max-w-sm rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 p-5 space-y-4">
+      <div class="flex items-start gap-3">
+        <div class="w-10 h-10 rounded-xl bg-rose-50 dark:bg-rose-500/15 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+          </svg>
+        </div>
+        <div>
+          <h3 id="confirm-title" class="text-base font-bold">Are you sure?</h3>
+          <p id="confirm-message" class="text-sm text-slate-500 dark:text-slate-400 mt-1"></p>
+        </div>
+      </div>
+      <div class="flex items-center justify-end gap-2.5 pt-1">
+        <button id="btn-confirm-cancel" type="button" class="px-4 py-2 rounded-xl text-sm font-medium bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition cursor-pointer">
+          Cancel
+        </button>
+        <button id="btn-confirm-ok" type="button" class="px-4 py-2 rounded-xl text-sm font-semibold bg-rose-600 hover:bg-rose-700 text-white transition cursor-pointer">
+          Confirm
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== TOAST NOTIFICATION CONTAINER ==================== -->
+  <div id="toast-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 max-w-sm w-[calc(100vw-2rem)] pointer-events-none"></div>
+
+  <!-- ==================== APPLICATION JAVASCRIPT ==================== -->
+  <script>
+    /**
+     * MapleTrack — Canadian Price & Stock Tracker
+     * Self-contained client-side dashboard with localStorage persistence,
+     * inline SVG sparklines, Chart.js history modal, and remote JSON feed sync.
+     */
+    (function () {
+      'use strict';
+
+      // -------------------- CONSTANTS & STORAGE KEYS --------------------
+      const STORAGE_KEY = 'mapletrack_ca_products_v1';
+      const FEED_URL_KEY = 'mapletrack_ca_feed_url_v1';
+      const LAST_SYNC_KEY = 'mapletrack_ca_last_sync_v1';
+      const THEME_KEY = 'mapletrack_ca_theme_v1';
+
+      const STORES = ['All', 'Best Buy Canada', 'FragranceBuy.ca', 'Uniqlo Canada', 'Other'];
+
+      // Helper to generate realistic past ISO timestamps (days ago)
+      function daysAgoISO(days) {
+        const d = new Date();
+        d.setDate(d.getDate() - days);
+        return d.toISOString();
+      }
+
+      // -------------------- STARTER DEMO DATA (4 ITEMS) --------------------
+      function getStarterProducts() {
+        return [
+          {
+            id: 'bb-mk13-refurb',
+            name: 'Apple Magic Keyboard for iPad Pro 13" (M4) - Refurbished (Good)',
+            store: 'Best Buy Canada',
+            url: 'https://www.bestbuy.ca/en-ca/product/refurbished-good-apple-magic-keyboard-for-ipad-pro-13-m4-english-black/19184599',
+            sku: '19184599',
+            currentPrice: 349.99,
+            targetPrice: 299.99,
+            status: 'Out of Stock',
+            notes: 'Refurbished (Good), English Black',
+            updatedAt: daysAgoISO(0),
+            history: [
+              { date: daysAgoISO(28), price: 399.99, status: 'In Stock', note: 'Initial listing check' },
+              { date: daysAgoISO(20), price: 379.99, status: 'In Stock', note: 'Refurbished markdown' },
+              { date: daysAgoISO(12), price: 349.99, status: 'In Stock', note: 'Price dropped $30' },
+              { date: daysAgoISO(4), price: 349.99, status: 'Out of Stock', note: 'Sold out online' },
+              { date: daysAgoISO(0), price: 349.99, status: 'Out of Stock', note: 'Monitoring for restock' },
+            ],
+          },
+          {
+            id: 'bb-mk13-openbox',
+            name: 'Apple Magic Keyboard for iPad Pro 13" (M4) - Open Box',
+            store: 'Best Buy Canada',
+            url: 'https://www.bestbuy.ca/en-ca/product/open-box-apple-magic-keyboard-for-ipad-pro-13-m4-english-black/18145549',
+            sku: '18145549',
+            currentPrice: 379.99,
+            targetPrice: 320.00,
+            status: 'In Stock',
+            notes: 'Open Box, 1-year warranty',
+            updatedAt: daysAgoISO(1),
+            history: [
+              { date: daysAgoISO(25), price: 419.99, status: 'In Stock', note: 'Baseline open-box price' },
+              { date: daysAgoISO(16), price: 399.99, status: 'In Stock', note: 'Minor reduction' },
+              { date: daysAgoISO(8), price: 389.99, status: 'Out of Stock', note: 'Briefly out of stock' },
+              { date: daysAgoISO(1), price: 379.99, status: 'In Stock', note: 'Restocked & $10 lower' },
+            ],
+          },
+          {
+            id: 'fb-sample-fragrance',
+            name: 'Designer Fragrance (Sample - Edit URL)',
+            store: 'FragranceBuy.ca',
+            url: 'https://fragrancebuy.ca/',
+            sku: '',
+            currentPrice: 115.00,
+            targetPrice: 95.00,
+            status: 'Out of Stock',
+            notes: '100ml EDP - Supports Shopify .json check',
+            updatedAt: daysAgoISO(2),
+            history: [
+              { date: daysAgoISO(30), price: 124.00, status: 'In Stock', note: 'Regular FragranceBuy price' },
+              { date: daysAgoISO(18), price: 119.00, status: 'In Stock', note: 'Small dip' },
+              { date: daysAgoISO(9), price: 115.00, status: 'In Stock', note: 'Low stock warning' },
+              { date: daysAgoISO(2), price: 115.00, status: 'Out of Stock', note: 'Sold out — awaiting restock' },
+            ],
+          },
+          {
+            id: 'uniqlo-sample-apparel',
+            name: 'Uniqlo Essential Apparel (Sample - Edit URL)',
+            store: 'Uniqlo Canada',
+            url: 'https://www.uniqlo.com/ca/en/',
+            sku: '',
+            currentPrice: 59.90,
+            targetPrice: 39.90,
+            status: 'In Stock',
+            notes: 'Size XS - Track weekly limited offers',
+            updatedAt: daysAgoISO(1),
+            history: [
+              { date: daysAgoISO(21), price: 59.90, status: 'In Stock', note: 'Regular retail price' },
+              { date: daysAgoISO(14), price: 49.90, status: 'In Stock', note: 'Weekly limited offer' },
+              { date: daysAgoISO(7), price: 59.90, status: 'In Stock', note: 'Offer ended' },
+              { date: daysAgoISO(1), price: 59.90, status: 'In Stock', note: 'Watching for next promo' },
+            ],
+          },
+        ];
+      }
+
+      // -------------------- APPLICATION STATE --------------------
+      let products = [];
+      let activeStoreFilter = 'All';
+      let searchQuery = '';
+      let sortBy = 'updated';
+      let historyChartInstance = null;
+      let confirmCallback = null;
+
+      // -------------------- DOM ELEMENT REFERENCES --------------------
+      const els = {
+        grid: document.getElementById('products-grid'),
+        emptyState: document.getElementById('empty-state'),
+        storePills: document.getElementById('store-filter-pills'),
+        searchInput: document.getElementById('search-input'),
+        sortSelect: document.getElementById('sort-select'),
+        // KPIs
+        kpiTotal: document.getElementById('kpi-total'),
+        kpiStoresCount: document.getElementById('kpi-stores-count'),
+        kpiDeals: document.getElementById('kpi-deals'),
+        kpiInStock: document.getElementById('kpi-instock'),
+        kpiInStockSub: document.getElementById('kpi-instock-sub'),
+        kpiAvgDiscount: document.getElementById('kpi-avg-discount'),
+        kpiAvgCad: document.getElementById('kpi-avg-cad'),
+        // Sync Banner
+        syncBanner: document.getElementById('sync-status-banner'),
+        syncBannerUrl: document.getElementById('sync-banner-url'),
+        syncBannerTime: document.getElementById('sync-banner-time'),
+        // Modals
+        modalProduct: document.getElementById('modal-product'),
+        modalQuickLog: document.getElementById('modal-quick-log'),
+        modalHistory: document.getElementById('modal-history'),
+        modalSync: document.getElementById('modal-sync'),
+        modalConfirm: document.getElementById('modal-confirm'),
+        // Forms
+        formProduct: document.getElementById('form-product'),
+        formQuickLog: document.getElementById('form-quick-log'),
+        // Theme
+        iconSun: document.getElementById('icon-sun'),
+        iconMoon: document.getElementById('icon-moon'),
+        // Toast
+        toastContainer: document.getElementById('toast-container'),
+      };
+
+      // -------------------- UTILITY FUNCTIONS --------------------
+      function formatCAD(val) {
+        const num = Number(val);
+        if (Number.isNaN(num)) return '$0.00';
+        return new Intl.NumberFormat('en-CA', {
+          style: 'currency',
+          currency: 'CAD',
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        }).format(num);
+      }
+
+      function escapeHtml(str) {
+        if (str === null || str === undefined) return '';
+        return String(str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#039;');
+      }
+
+      function formatRelativeDate(iso) {
+        if (!iso) return 'Just now';
+        const date = new Date(iso);
+        const diffMs = Date.now() - date.getTime();
+        const diffMins = Math.floor(diffMs / 60000);
+        if (diffMins < 1) return 'Just now';
+        if (diffMins < 60) return `${diffMins}m ago`;
+        const diffHours = Math.floor(diffMins / 60);
+        if (diffHours < 24) return `${diffHours}h ago`;
+        const diffDays = Math.floor(diffHours / 24);
+        if (diffDays < 30) return `${diffDays}d ago`;
+        return date.toLocaleDateString('en-CA', { month: 'short', day: 'numeric' });
+      }
+
+      function formatFullDate(iso) {
+        if (!iso) return '';
+        return new Date(iso).toLocaleString('en-CA', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+          hour: 'numeric',
+          minute: '2-digit',
+        });
+      }
+
+      function getStoreBadgeClasses(store) {
+        switch (store) {
+          case 'Best Buy Canada':
+            return 'bg-blue-50 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300 border border-blue-200/80 dark:border-blue-500/25';
+          case 'FragranceBuy.ca':
+            return 'bg-purple-50 text-purple-700 dark:bg-purple-500/15 dark:text-purple-300 border border-purple-200/80 dark:border-purple-500/25';
+          case 'Uniqlo Canada':
+            return 'bg-red-50 text-red-700 dark:bg-red-500/15 dark:text-red-300 border border-red-200/80 dark:border-red-500/25';
+          default:
+            return 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700';
+        }
+      }
+
+      function copyToClipboard(text, label = 'Copied to clipboard') {
+        try {
+          const textarea = document.createElement('textarea');
+          textarea.value = text;
+          textarea.setAttribute('readonly', '');
+          textarea.style.position = 'fixed';
+          textarea.style.opacity = '0';
+          document.body.appendChild(textarea);
+          textarea.select();
+          document.execCommand('copy');
+          document.body.removeChild(textarea);
+          showToast(label, 'success');
+        } catch (err) {
+          showToast('Could not copy text automatically.', 'error');
+        }
+      }
+
+      // -------------------- TOAST NOTIFICATIONS --------------------
+      function showToast(message, type = 'info') {
+        const colors = {
+          success: 'bg-emerald-600 text-white',
+          error: 'bg-rose-600 text-white',
+          info: 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900',
+        };
+        const toast = document.createElement('div');
+        toast.className = `pointer-events-auto px-4 py-3 rounded-xl shadow-lg text-sm font-medium flex items-center justify-between gap-3 transition-all duration-200 translate-y-2 opacity-0 ${colors[type] || colors.info}`;
+        toast.innerHTML = `<span>${escapeHtml(message)}</span>`;
+        els.toastContainer.appendChild(toast);
+
+        requestAnimationFrame(() => {
+          toast.classList.remove('translate-y-2', 'opacity-0');
+        });
+
+        setTimeout(() => {
+          toast.classList.add('translate-y-2', 'opacity-0');
+          setTimeout(() => toast.remove(), 220);
+        }, 3200);
+      }
+
+      // -------------------- THEME MANAGEMENT --------------------
+      function initTheme() {
+        const saved = localStorage.getItem(THEME_KEY);
+        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const isDark = saved ? saved === 'dark' : prefersDark;
+        applyTheme(isDark);
+      }
+
+      function applyTheme(isDark) {
+        document.documentElement.classList.toggle('dark', isDark);
+        els.iconSun.classList.toggle('hidden', !isDark);
+        els.iconMoon.classList.toggle('hidden', isDark);
+        localStorage.setItem(THEME_KEY, isDark ? 'dark' : 'light');
+      }
+
+      // -------------------- STORAGE PERSISTENCE --------------------
+      function loadProducts() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              products = parsed;
+              return;
+            }
+          }
+        } catch (err) {
+          console.error('Error loading from localStorage:', err);
+        }
+        products = getStarterProducts();
+        saveProducts();
+      }
+
+      function saveProducts() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
+        } catch (err) {
+          showToast('Storage quota exceeded. Could not save changes.', 'error');
+        }
+      }
+
+      // -------------------- INLINE SVG SPARKLINE GENERATOR --------------------
+      function buildSparklineSVG(history, targetPrice, isDealHit) {
+        const points = (history && history.length > 0)
+          ? history.map((h) => Number(h.price))
+          : [0];
+
+        // If only 1 point, duplicate it to render a flat line
+        const vals = points.length === 1 ? [points[0], points[0]] : points;
+        const width = 220;
+        const height = 44;
+        const padY = 6;
+        const minVal = Math.min(...vals, targetPrice);
+        const maxVal = Math.max(...vals, targetPrice);
+        const range = maxVal - minVal || 1;
+
+        const coords = vals.map((v, i) => {
+          const x = (i / (vals.length - 1)) * width;
+          const y = height - padY - ((v - minVal) / range) * (height - padY * 2);
+          return { x: Number(x.toFixed(1)), y: Number(y.toFixed(1)) };
+        });
+
+        const targetY = Number(
+          (height - padY - ((targetPrice - minVal) / range) * (height - padY * 2)).toFixed(1)
+        );
+
+        const polylinePoints = coords.map((c) => `${c.x},${c.y}`).join(' ');
+        const areaPoints = `0,${height} ${polylinePoints} ${width},${height}`;
+        const strokeColor = isDealHit ? '#10b981' : '#6366f1';
+        const gradId = `grad-${Math.random().toString(36).slice(2, 9)}`;
+        const last = coords[coords.length - 1];
+
+        return `
+          <svg viewBox="0 0 ${width} ${height}" class="w-full h-11 overflow-visible" preserveAspectRatio="none" aria-hidden="true">
+            <defs>
+              <linearGradient id="${gradId}" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="${strokeColor}" stop-opacity="0.22" />
+                <stop offset="100%" stop-color="${strokeColor}" stop-opacity="0.0" />
+              </linearGradient>
+            </defs>
+            <!-- Target Price Dashed Reference Line -->
+            <line x1="0" y1="${targetY}" x2="${width}" y2="${targetY}" stroke="#94a3b8" stroke-width="1" stroke-dasharray="3,3" opacity="0.65" />
+            <!-- Area Fill -->
+            <polygon points="${areaPoints}" fill="url(#${gradId})" />
+            <!-- Price Line -->
+            <polyline fill="none" stroke="${strokeColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="${polylinePoints}" />
+            <!-- Latest Data Point Dot -->
+            <circle cx="${last.x}" cy="${last.y}" r="3.2" fill="${strokeColor}" />
+          </svg>
+        `;
+      }
+
+      // -------------------- RENDER KPIs --------------------
+      function renderKPIs() {
+        const total = products.length;
+        const uniqueStores = new Set(products.map((p) => p.store)).size;
+        const dealsHit = products.filter((p) => Number(p.currentPrice) <= Number(p.targetPrice)).length;
+        const inStock = products.filter((p) => p.status === 'In Stock').length;
+
+        let totalPctGap = 0;
+        let totalCadGap = 0;
+        if (total > 0) {
+          products.forEach((p) => {
+            const cur = Number(p.currentPrice) || 0;
+            const tgt = Number(p.targetPrice) || 0;
+            const diff = Math.max(0, cur - tgt);
+            totalCadGap += diff;
+            totalPctGap += cur > 0 ? (diff / cur) * 100 : 0;
+          });
+        }
+        const avgPct = total > 0 ? (totalPctGap / total) : 0;
+        const avgCad = total > 0 ? (totalCadGap / total) : 0;
+
+        els.kpiTotal.textContent = total;
+        els.kpiStoresCount.textContent = `across ${uniqueStores} ${uniqueStores === 1 ? 'store' : 'stores'}`;
+        els.kpiDeals.textContent = dealsHit;
+        els.kpiInStock.textContent = inStock;
+        els.kpiInStockSub.textContent = `of ${total} tracked`;
+        els.kpiAvgDiscount.textContent = `${avgPct.toFixed(1)}%`;
+        els.kpiAvgCad.textContent = `${formatCAD(avgCad)} avg gap`;
+      }
+
+      // -------------------- RENDER STORE FILTER PILLS --------------------
+      function renderStorePills() {
+        els.storePills.innerHTML = STORES.map((store) => {
+          const count = store === 'All'
+            ? products.length
+            : products.filter((p) => p.store === store).length;
+          const isActive = activeStoreFilter === store;
+          const activeClasses = 'bg-slate-900 text-white dark:bg-indigo-600 dark:text-white shadow-sm';
+          const idleClasses = 'bg-slate-100 hover:bg-slate-200/80 text-slate-600 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300';
+
+          return `
+            <button
+              type="button"
+              data-store-filter="${escapeHtml(store)}"
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs sm:text-sm font-medium transition cursor-pointer ${isActive ? activeClasses : idleClasses}"
+            >
+              <span>${escapeHtml(store)}</span>
+              <span class="px-1.5 py-0.5 rounded-md text-[11px] font-semibold ${isActive ? 'bg-white/20 text-white' : 'bg-slate-200/80 dark:bg-slate-700 text-slate-600 dark:text-slate-300'}">${count}</span>
+            </button>
+          `;
+        }).join('');
+      }
+
+      // -------------------- FILTER & SORT LOGIC --------------------
+      function getFilteredProducts() {
+        const q = searchQuery.trim().toLowerCase();
+        let list = products.filter((p) => {
+          const matchesStore = activeStoreFilter === 'All' || p.store === activeStoreFilter;
+          if (!matchesStore) return false;
+          if (!q) return true;
+          return (
+            (p.name && p.name.toLowerCase().includes(q)) ||
+            (p.store && p.store.toLowerCase().includes(q)) ||
+            (p.sku && p.sku.toLowerCase().includes(q)) ||
+            (p.notes && p.notes.toLowerCase().includes(q))
+          );
+        });
+
+        list.sort((a, b) => {
+          switch (sortBy) {
+            case 'price-asc':
+              return Number(a.currentPrice) - Number(b.currentPrice);
+            case 'price-desc':
+              return Number(b.currentPrice) - Number(a.currentPrice);
+            case 'closest': {
+              const gapA = (Number(a.currentPrice) - Number(a.targetPrice)) / (Number(a.currentPrice) || 1);
+              const gapB = (Number(b.currentPrice) - Number(b.targetPrice)) / (Number(b.currentPrice) || 1);
+              return gapA - gapB;
+            }
+            case 'name':
+              return a.name.localeCompare(b.name);
+            case 'updated':
+            default:
+              return new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0);
+          }
+        });
+
+        return list;
+      }
+
+      // -------------------- RENDER PRODUCT CARDS --------------------
+      function renderProducts() {
+        const filtered = getFilteredProducts();
+
+        if (filtered.length === 0) {
+          els.grid.innerHTML = '';
+          els.emptyState.classList.remove('hidden');
+          return;
+        }
+        els.emptyState.classList.add('hidden');
+
+        els.grid.innerHTML = filtered.map((item) => {
+          const cur = Number(item.currentPrice);
+          const tgt = Number(item.targetPrice);
+          const isDealHit = cur <= tgt;
+          const isInStock = item.status === 'In Stock';
+          const diff = cur - tgt;
+
+          // Check if latest price dropped compared to previous log entry
+          const hist = item.history || [];
+          const hasRecentDrop = hist.length >= 2 && Number(hist[hist.length - 1].price) < Number(hist[hist.length - 2].price);
+
+          // Progress bar calculation (100% when cur <= tgt)
+          let progressPct = 100;
+          if (cur > tgt && cur > 0) {
+            progressPct = Math.max(12, Math.min(96, Math.round((tgt / cur) * 100)));
+          }
+
+          const stockBadge = isInStock
+            ? `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-500/25"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>In Stock</span>`
+            : `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300 border border-rose-200/80 dark:border-rose-500/25"><span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>Out of Stock</span>`;
+
+          const alertBadge = isDealHit
+            ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300 border border-amber-300/70 dark:border-amber-500/30">🔥 Target Hit</span>`
+            : hasRecentDrop
+              ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/30">↓ Price Drop</span>`
+              : '';
+
+          const skuPill = item.sku
+            ? `<button type="button" data-copy-sku="${escapeHtml(item.sku)}" class="inline-flex items-center gap-1 text-[11px] font-mono text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition cursor-pointer" title="Click to copy SKU">SKU: ${escapeHtml(item.sku)}</button>`
+            : '';
+
+          return `
+            <article class="group bg-white dark:bg-slate-900 rounded-2xl border ${isDealHit ? 'border-emerald-400/80 dark:border-emerald-500/50 ring-1 ring-emerald-500/20' : 'border-slate-200/80 dark:border-slate-800'} shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between overflow-hidden">
+              <div class="p-5 space-y-4">
+                <!-- Top Badges Row -->
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-lg text-xs font-semibold ${getStoreBadgeClasses(item.store)}">
+                    ${escapeHtml(item.store)}
+                  </span>
+                  <div class="flex items-center gap-1.5">
+                    ${alertBadge}
+                    ${stockBadge}
+                  </div>
+                </div>
+
+                <!-- Title & Notes -->
+                <div>
+                  <h3 data-open-history="${escapeHtml(item.id)}" class="text-base font-bold text-slate-900 dark:text-white leading-snug group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition cursor-pointer line-clamp-2">
+                    ${escapeHtml(item.name)}
+                  </h3>
+                  <div class="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500 dark:text-slate-400">
+                    ${skuPill}
+                    ${item.notes ? `<span class="truncate max-w-full">${escapeHtml(item.notes)}</span>` : ''}
+                  </div>
+                </div>
+
+                <!-- Pricing & Target Progress -->
+                <div class="space-y-2">
+                  <div class="flex items-baseline justify-between gap-2">
+                    <div>
+                      <span class="text-2xl font-extrabold tracking-tight ${isDealHit ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-900 dark:text-white'}">${formatCAD(cur)}</span>
+                      <span class="text-xs font-medium text-slate-400 ml-1">CAD</span>
+                    </div>
+                    <div class="text-right">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Target: <span class="font-semibold text-slate-700 dark:text-slate-200">${formatCAD(tgt)}</span></div>
+                    </div>
+                  </div>
+
+                  <!-- Progress Bar -->
+                  <div class="w-full h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                    <div class="h-full rounded-full transition-all duration-500 ${isDealHit ? 'bg-emerald-500' : 'bg-indigo-500'}" style="width: ${progressPct}%"></div>
+                  </div>
+                  <div class="flex items-center justify-between text-[11px] font-medium">
+                    <span class="${isDealHit ? 'text-emerald-600 dark:text-emerald-400 font-semibold' : 'text-slate-500 dark:text-slate-400'}">
+                      ${isDealHit ? `✓ Target met (${formatCAD(Math.abs(diff))} under)` : `${formatCAD(diff)} above target`}
+                    </span>
+                    <span class="text-slate-400">Updated ${formatRelativeDate(item.updatedAt)}</span>
+                  </div>
+                </div>
+
+                <!-- Inline SVG Sparkline (Clickable for History Modal) -->
+                <div data-open-history="${escapeHtml(item.id)}" class="pt-1 cursor-pointer group/spark" title="Click to view full price history">
+                  <div class="flex items-center justify-between text-[11px] text-slate-400 mb-1">
+                    <span>Price Trend (${hist.length} ${hist.length === 1 ? 'log' : 'logs'})</span>
+                    <span class="text-indigo-600 dark:text-indigo-400 font-medium opacity-80 group-hover/spark:opacity-100 group-hover/spark:underline">View Chart →</span>
+                  </div>
+                  <div class="rounded-xl bg-slate-50/90 dark:bg-slate-800/50 px-2.5 py-1.5 border border-slate-100 dark:border-slate-800">
+                    ${buildSparklineSVG(hist, tgt, isDealHit)}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Card Action Footer -->
+              <div class="px-4 py-3 bg-slate-50/80 dark:bg-slate-800/40 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
+                <div class="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    data-quick-log="${escapeHtml(item.id)}"
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white transition cursor-pointer"
+                  >
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6" /></svg>
+                    Log Update
+                  </button>
+
+                  <a
+                    href="${escapeHtml(item.url)}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 transition"
+                  >
+                    <span>Open</span>
+                    <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" /></svg>
+                  </a>
+                </div>
+
+                <div class="flex items-center gap-1">
+                  <button
+                    type="button"
+                    data-open-history="${escapeHtml(item.id)}"
+                    class="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-200/60 dark:hover:bg-slate-700/60 transition cursor-pointer"
+                    title="Price History"
+                    aria-label="Price History"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  </button>
+                  <button
+                    type="button"
+                    data-edit-product="${escapeHtml(item.id)}"
+                    class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-slate-700/60 transition cursor-pointer"
+                    title="Edit Product"
+                    aria-label="Edit Product"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" /></svg>
+                  </button>
+                  <button
+                    type="button"
+                    data-delete-product="${escapeHtml(item.id)}"
+                    class="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/15 transition cursor-pointer"
+                    title="Delete Product"
+                    aria-label="Delete Product"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>
+                  </button>
+                </div>
+              </div>
+            </article>
+          `;
+        }).join('');
+      }
+
+      // -------------------- RENDER SYNC BANNER --------------------
+      function renderSyncBanner() {
+        const feedUrl = localStorage.getItem(FEED_URL_KEY);
+        const lastSync = localStorage.getItem(LAST_SYNC_KEY);
+        if (feedUrl) {
+          els.syncBanner.classList.remove('hidden');
+          els.syncBannerUrl.textContent = feedUrl;
+          els.syncBannerTime.textContent = lastSync ? `Last synced ${formatRelativeDate(lastSync)}` : 'Not synced yet';
+        } else {
+          els.syncBanner.classList.add('hidden');
+        }
+      }
+
+      // Master render function
+      function renderAll() {
+        renderKPIs();
+        renderStorePills();
+        renderProducts();
+        renderSyncBanner();
+      }
+
+      // -------------------- MODAL HELPERS --------------------
+      function openModal(modalEl) {
+        modalEl.classList.remove('hidden');
+        modalEl.classList.add('flex');
+        document.body.classList.add('overflow-hidden');
+      }
+
+      function closeModal(modalEl) {
+        modalEl.classList.add('hidden');
+        modalEl.classList.remove('flex');
+        document.body.classList.remove('overflow-hidden');
+      }
+
+      function showConfirm(title, message, onConfirm) {
+        document.getElementById('confirm-title').textContent = title;
+        document.getElementById('confirm-message').textContent = message;
+        confirmCallback = onConfirm;
+        openModal(els.modalConfirm);
+      }
+
+      // -------------------- ADD / EDIT PRODUCT MODAL --------------------
+      function openProductModal(productId = null) {
+        const titleEl = document.getElementById('modal-product-title');
+        els.formProduct.reset();
+
+        if (productId) {
+          const item = products.find((p) => p.id === productId);
+          if (!item) return;
+          titleEl.textContent = 'Edit Tracked Product';
+          document.getElementById('prod-id').value = item.id;
+          document.getElementById('prod-name').value = item.name;
+          document.getElementById('prod-store').value = STORES.includes(item.store) ? item.store : 'Other';
+          document.getElementById('prod-sku').value = item.sku || '';
+          document.getElementById('prod-url').value = item.url;
+          document.getElementById('prod-current-price').value = Number(item.currentPrice).toFixed(2);
+          document.getElementById('prod-target-price').value = Number(item.targetPrice).toFixed(2);
+          document.getElementById('prod-status').value = item.status;
+          document.getElementById('prod-notes').value = item.notes || '';
+        } else {
+          titleEl.textContent = 'Add Product to Track';
+          document.getElementById('prod-id').value = '';
+        }
+
+        openModal(els.modalProduct);
+      }
+
+      function handleSaveProduct(e) {
+        e.preventDefault();
+        const id = document.getElementById('prod-id').value.trim();
+        const name = document.getElementById('prod-name').value.trim();
+        const store = document.getElementById('prod-store').value;
+        const sku = document.getElementById('prod-sku').value.trim();
+        const url = document.getElementById('prod-url').value.trim();
+        const currentPrice = parseFloat(document.getElementById('prod-current-price').value);
+        const targetPrice = parseFloat(document.getElementById('prod-target-price').value);
+        const status = document.getElementById('prod-status').value;
+        const notes = document.getElementById('prod-notes').value.trim();
+        const now = new Date().toISOString();
+
+        if (!name || !url || Number.isNaN(currentPrice) || Number.isNaN(targetPrice)) {
+          showToast('Please fill in all required fields with valid values.', 'error');
+          return;
+        }
+
+        if (id) {
+          // Update existing product
+          const idx = products.findIndex((p) => p.id === id);
+          if (idx !== -1) {
+            const existing = products[idx];
+            const priceOrStatusChanged =
+              Number(existing.currentPrice) !== currentPrice || existing.status !== status;
+
+            const updatedHistory = [...(existing.history || [])];
+            if (priceOrStatusChanged) {
+              updatedHistory.push({
+                date: now,
+                price: currentPrice,
+                status,
+                note: 'Updated via Edit Product',
+              });
+            }
+
+            products[idx] = {
+              ...existing,
+              name,
+              store,
+              sku,
+              url,
+              currentPrice,
+              targetPrice,
+              status,
+              notes,
+              updatedAt: now,
+              history: updatedHistory,
+            };
+            showToast('Product updated!', 'success');
+          }
+        } else {
+          // Add new product
+          const newProduct = {
+            id: 'item-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+            name,
+            store,
+            sku,
+            url,
+            currentPrice,
+            targetPrice,
+            status,
+            notes,
+            updatedAt: now,
+            history: [
+              {
+                date: now,
+                price: currentPrice,
+                status,
+                note: 'Added to watchlist',
+              },
+            ],
+          };
+          products.unshift(newProduct);
+          showToast('Added to your watchlist!', 'success');
+        }
+
+        saveProducts();
+        renderAll();
+        closeModal(els.modalProduct);
+      }
+
+      // -------------------- QUICK LOG UPDATE MODAL --------------------
+      function openQuickLogModal(productId) {
+        const item = products.find((p) => p.id === productId);
+        if (!item) return;
+
+        document.getElementById('quick-log-id').value = item.id;
+        document.getElementById('quick-log-subtitle').textContent = item.name;
+        document.getElementById('quick-log-price').value = Number(item.currentPrice).toFixed(2);
+        document.getElementById('quick-log-status').value = item.status;
+        document.getElementById('quick-log-note').value = '';
+
+        openModal(els.modalQuickLog);
+      }
+
+      function handleQuickLogSubmit(e) {
+        e.preventDefault();
+        const id = document.getElementById('quick-log-id').value;
+        const newPrice = parseFloat(document.getElementById('quick-log-price').value);
+        const newStatus = document.getElementById('quick-log-status').value;
+        const note = document.getElementById('quick-log-note').value.trim() || 'Manual check';
+
+        const idx = products.findIndex((p) => p.id === id);
+        if (idx === -1 || Number.isNaN(newPrice)) return;
+
+        const now = new Date().toISOString();
+        const item = products[idx];
+        item.currentPrice = newPrice;
+        item.status = newStatus;
+        item.updatedAt = now;
+        item.history = item.history || [];
+        item.history.push({
+          date: now,
+          price: newPrice,
+          status: newStatus,
+          note,
+        });
+
+        saveProducts();
+        renderAll();
+        closeModal(els.modalQuickLog);
+
+        if (newPrice <= Number(item.targetPrice)) {
+          showToast(`Target price hit! ${formatCAD(newPrice)} CAD`, 'success');
+        } else {
+          showToast('Price & stock update logged.', 'success');
+        }
+      }
+
+      // -------------------- HISTORY MODAL & CHART.JS --------------------
+      function openHistoryModal(productId) {
+        const item = products.find((p) => p.id === productId);
+        if (!item) return;
+
+        const hist = item.history && item.history.length > 0
+          ? item.history
+          : [{ date: item.updatedAt, price: item.currentPrice, status: item.status, note: 'Current' }];
+
+        const prices = hist.map((h) => Number(h.price));
+        const low = Math.min(...prices);
+        const high = Math.max(...prices);
+
+        // Populate Header & Stats
+        const storeBadge = document.getElementById('history-store-badge');
+        storeBadge.className = `inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold ${getStoreBadgeClasses(item.store)}`;
+        storeBadge.textContent = item.store;
+
+        document.getElementById('history-sku-badge').textContent = item.sku ? `SKU: ${item.sku}` : '';
+        document.getElementById('history-title').textContent = item.name;
+        document.getElementById('hist-stat-current').textContent = formatCAD(item.currentPrice);
+        document.getElementById('hist-stat-target').textContent = formatCAD(item.targetPrice);
+        document.getElementById('hist-stat-low').textContent = formatCAD(low);
+        document.getElementById('hist-stat-high').textContent = formatCAD(high);
+
+        // Populate Timestamped Logs (newest first)
+        const reversed = [...hist].reverse();
+        document.getElementById('history-log-list').innerHTML = reversed.map((entry, idx) => {
+          const prevEntry = reversed[idx + 1];
+          let deltaHtml = '';
+          if (prevEntry) {
+            const diff = Number(entry.price) - Number(prevEntry.price);
+            if (diff < 0) {
+              deltaHtml = `<span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400">(${formatCAD(diff)})</span>`;
+            } else if (diff > 0) {
+              deltaHtml = `<span class="text-xs font-semibold text-rose-600 dark:text-rose-400">(+${formatCAD(diff)})</span>`;
+            }
+          }
+          const isIn = entry.status === 'In Stock';
+          return `
+            <div class="px-4 py-3 flex flex-wrap items-center justify-between gap-2 bg-white dark:bg-slate-900">
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="text-sm font-bold">${formatCAD(entry.price)}</span>
+                  ${deltaHtml}
+                  <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold ${isIn ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300' : 'bg-rose-50 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300'}">${escapeHtml(entry.status)}</span>
+                </div>
+                ${entry.note ? `<p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">${escapeHtml(entry.note)}</p>` : ''}
+              </div>
+              <span class="text-xs text-slate-400">${formatFullDate(entry.date)}</span>
+            </div>
+          `;
+        }).join('');
+
+        openModal(els.modalHistory);
+
+        // Render Chart.js Line Chart
+        if (historyChartInstance) {
+          historyChartInstance.destroy();
+          historyChartInstance = null;
+        }
+
+        const isDark = document.documentElement.classList.contains('dark');
+        const gridColor = isDark ? 'rgba(148, 163, 184, 0.12)' : 'rgba(148, 163, 184, 0.2)';
+        const textColor = isDark ? '#94a3b8' : '#64748b';
+
+        const ctx = document.getElementById('history-chart').getContext('2d');
+        const labels = hist.map((h) =>
+          new Date(h.date).toLocaleDateString('en-CA', { month: 'short', day: 'numeric' })
+        );
+
+        historyChartInstance = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels,
+            datasets: [
+              {
+                label: 'Logged Price (CAD)',
+                data: prices,
+                borderColor: '#6366f1',
+                backgroundColor: 'rgba(99, 102, 241, 0.12)',
+                borderWidth: 2.5,
+                tension: 0.25,
+                fill: true,
+                pointRadius: 4,
+                pointHoverRadius: 6,
+                pointBackgroundColor: '#6366f1',
+              },
+              {
+                label: 'Target Price',
+                data: prices.map(() => Number(item.targetPrice)),
+                borderColor: '#10b981',
+                borderWidth: 1.8,
+                borderDash: [6, 4],
+                pointRadius: 0,
+                fill: false,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+              legend: {
+                labels: { color: textColor, boxWidth: 12, font: { family: 'Inter', size: 11 } },
+              },
+              tooltip: {
+                callbacks: {
+                  label: (context) => `${context.dataset.label}: ${formatCAD(context.parsed.y)}`,
+                },
+              },
+            },
+            scales: {
+              x: {
+                grid: { display: false },
+                ticks: { color: textColor, font: { family: 'Inter', size: 11 } },
+              },
+              y: {
+                grid: { color: gridColor },
+                ticks: {
+                  color: textColor,
+                  font: { family: 'Inter', size: 11 },
+                  callback: (val) => '$' + val,
+                },
+              },
+            },
+          },
+        });
+      }
+
+      // -------------------- LIVE FEED SYNC & JSON BACKUP --------------------
+      async function syncFromRemoteFeed(urlToFetch) {
+        const feedUrl = (urlToFetch || document.getElementById('sync-feed-url').value || '').trim();
+        if (!feedUrl) {
+          showToast('Please enter a valid JSON feed URL first.', 'error');
+          return;
+        }
+
+        const btn = document.getElementById('btn-run-sync');
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<span>Syncing...</span>';
+
+        try {
+          const response = await fetch(feedUrl, { cache: 'no-store' });
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status} ${response.statusText}`);
+          }
+          const data = await response.json();
+          const incoming = Array.isArray(data) ? data : (Array.isArray(data.products) ? data.products : null);
+
+          if (!incoming) {
+            throw new Error('JSON must be an array of items or an object with a "products" array.');
+          }
+
+          const now = new Date().toISOString();
+          let updatedCount = 0;
+          let addedCount = 0;
+
+          incoming.forEach((inc) => {
+            if (!inc || typeof inc !== 'object') return;
+            const matchIdx = products.findIndex((p) =>
+              (inc.id && p.id === inc.id) ||
+              (inc.sku && p.sku && String(p.sku) === String(inc.sku)) ||
+              (inc.url && p.url === inc.url)
+            );
+
+            if (matchIdx !== -1) {
+              const target = products[matchIdx];
+              const newPrice = inc.currentPrice !== undefined ? Number(inc.currentPrice) : Number(target.currentPrice);
+              const newStatus = inc.status || target.status;
+
+              if (newPrice !== Number(target.currentPrice) || newStatus !== target.status) {
+                target.currentPrice = newPrice;
+                target.status = newStatus;
+                target.updatedAt = now;
+                target.history = target.history || [];
+                target.history.push({
+                  date: now,
+                  price: newPrice,
+                  status: newStatus,
+                  note: inc.note || 'Auto-synced from Live Feed',
+                });
+                updatedCount++;
+              }
+            } else if (inc.name && inc.url && inc.currentPrice !== undefined) {
+              products.unshift({
+                id: inc.id || 'feed-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5),
+                name: inc.name,
+                store: inc.store || 'Other',
+                url: inc.url,
+                sku: inc.sku || '',
+                currentPrice: Number(inc.currentPrice),
+                targetPrice: Number(inc.targetPrice ?? inc.currentPrice),
+                status: inc.status || 'In Stock',
+                notes: inc.notes || 'Added from Live Feed',
+                updatedAt: now,
+                history: [
+                  {
+                    date: now,
+                    price: Number(inc.currentPrice),
+                    status: inc.status || 'In Stock',
+                    note: inc.note || 'Imported from Live Feed',
+                  },
+                ],
+              });
+              addedCount++;
+            }
+          });
+
+          localStorage.setItem(FEED_URL_KEY, feedUrl);
+          localStorage.setItem(LAST_SYNC_KEY, now);
+          saveProducts();
+          renderAll();
+
+          showToast(`Sync complete: ${updatedCount} updated, ${addedCount} added.`, 'success');
+        } catch (err) {
+          console.error('Sync failed:', err);
+          showToast(`Sync failed: ${err.message}`, 'error');
+        } finally {
+          btn.disabled = false;
+          btn.innerHTML = originalText;
+        }
+      }
+
+      function exportBackupJSON() {
+        try {
+          const payload = JSON.stringify({ exportedAt: new Date().toISOString(), products }, null, 2);
+          const blob = new Blob([payload], { type: 'application/json' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `mapletrack-backup-${new Date().toISOString().slice(0, 10)}.json`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          showToast('JSON backup exported.', 'success');
+        } catch (err) {
+          showToast('Failed to export JSON backup.', 'error');
+        }
+      }
+
+      function importBackupJSON(file) {
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const parsed = JSON.parse(e.target.result);
+            const importedList = Array.isArray(parsed) ? parsed : parsed.products;
+            if (!Array.isArray(importedList)) {
+              throw new Error('Invalid JSON structure.');
+            }
+            products = importedList;
+            saveProducts();
+            renderAll();
+            closeModal(els.modalSync);
+            showToast(`Imported ${importedList.length} products successfully.`, 'success');
+          } catch (err) {
+            showToast('Could not import JSON: ' + err.message, 'error');
+          }
+        };
+        reader.readAsText(file);
+      }
+
+      // -------------------- EVENT LISTENERS --------------------
+      function bindEvents() {
+        // Header actions
+        document.getElementById('btn-add-product').addEventListener('click', () => openProductModal());
+        document.getElementById('btn-empty-add').addEventListener('click', () => openProductModal());
+
+        document.getElementById('btn-theme-toggle').addEventListener('click', () => {
+          const isDark = document.documentElement.classList.contains('dark');
+          applyTheme(!isDark);
+        });
+
+        document.getElementById('btn-reset-demo').addEventListener('click', () => {
+          showConfirm(
+            'Reset to Demo Data?',
+            'This will replace your current watchlist with the 4 starter Canadian items (Best Buy, FragranceBuy, Uniqlo).',
+            () => {
+              products = getStarterProducts();
+              activeStoreFilter = 'All';
+              searchQuery = '';
+              els.searchInput.value = '';
+              saveProducts();
+              renderAll();
+              showToast('Demo watchlist restored.', 'info');
+            }
+          );
+        });
+
+        document.getElementById('btn-open-sync').addEventListener('click', () => {
+          document.getElementById('sync-feed-url').value = localStorage.getItem(FEED_URL_KEY) || '';
+          openModal(els.modalSync);
+        });
+
+        document.getElementById('btn-run-sync').addEventListener('click', () => syncFromRemoteFeed());
+        document.getElementById('btn-quick-sync').addEventListener('click', () => {
+          syncFromRemoteFeed(localStorage.getItem(FEED_URL_KEY));
+        });
+
+        document.getElementById('btn-copy-schema').addEventListener('click', () => {
+          const code = document.getElementById('sample-schema-code').textContent;
+          copyToClipboard(code, 'Sample JSON schema copied!');
+        });
+
+        document.getElementById('btn-export-json').addEventListener('click', exportBackupJSON);
+        document.getElementById('input-import-json').addEventListener('change', (e) => {
+          importBackupJSON(e.target.files[0]);
+          e.target.value = '';
+        });
+
+        // Filters & Search
+        els.storePills.addEventListener('click', (e) => {
+          const btn = e.target.closest('[data-store-filter]');
+          if (!btn) return;
+          activeStoreFilter = btn.getAttribute('data-store-filter');
+          renderStorePills();
+          renderProducts();
+        });
+
+        els.searchInput.addEventListener('input', (e) => {
+          searchQuery = e.target.value;
+          renderProducts();
+        });
+
+        els.sortSelect.addEventListener('change', (e) => {
+          sortBy = e.target.value;
+          renderProducts();
+        });
+
+        document.getElementById('btn-clear-filters').addEventListener('click', () => {
+          activeStoreFilter = 'All';
+          searchQuery = '';
+          els.searchInput.value = '';
+          renderStorePills();
+          renderProducts();
+        });
+
+        // Product Grid Event Delegation (Sparkline, History, Quick Log, Edit, Delete, Copy SKU)
+        els.grid.addEventListener('click', (e) => {
+          const copyBtn = e.target.closest('[data-copy-sku]');
+          if (copyBtn) {
+            copyToClipboard(copyBtn.getAttribute('data-copy-sku'), 'SKU copied to clipboard!');
+            return;
+          }
+
+          const quickBtn = e.target.closest('[data-quick-log]');
+          if (quickBtn) {
+            openQuickLogModal(quickBtn.getAttribute('data-quick-log'));
+            return;
+          }
+
+          const histBtn = e.target.closest('[data-open-history]');
+          if (histBtn) {
+            openHistoryModal(histBtn.getAttribute('data-open-history'));
+            return;
+          }
+
+          const editBtn = e.target.closest('[data-edit-product]');
+          if (editBtn) {
+            openProductModal(editBtn.getAttribute('data-edit-product'));
+            return;
+          }
+
+          const delBtn = e.target.closest('[data-delete-product]');
+          if (delBtn) {
+            const id = delBtn.getAttribute('data-delete-product');
+            const item = products.find((p) => p.id === id);
+            if (!item) return;
+            showConfirm(
+              'Remove Item?',
+              `Delete "${item.name}" and its price history from your watchlist?`,
+              () => {
+                products = products.filter((p) => p.id !== id);
+                saveProducts();
+                renderAll();
+                showToast('Item removed.', 'info');
+              }
+            );
+          }
+        });
+
+        // Forms
+        els.formProduct.addEventListener('submit', handleSaveProduct);
+        els.formQuickLog.addEventListener('submit', handleQuickLogSubmit);
+
+        // Modal Close Buttons & Backdrop Click
+        document.querySelectorAll('[data-close-modal]').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const targetId = btn.getAttribute('data-close-modal');
+            const modalEl = document.getElementById(targetId);
+            if (modalEl) closeModal(modalEl);
+          });
+        });
+
+        [els.modalProduct, els.modalQuickLog, els.modalHistory, els.modalSync, els.modalConfirm].forEach((modal) => {
+          modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeModal(modal);
+          });
+        });
+
+        // Confirm Modal Actions
+        document.getElementById('btn-confirm-cancel').addEventListener('click', () => {
+          confirmCallback = null;
+          closeModal(els.modalConfirm);
+        });
+        document.getElementById('btn-confirm-ok').addEventListener('click', () => {
+          const cb = confirmCallback;
+          confirmCallback = null;
+          closeModal(els.modalConfirm);
+          if (typeof cb === 'function') cb();
+        });
+
+        // Escape key closes open modals
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') {
+            [els.modalProduct, els.modalQuickLog, els.modalHistory, els.modalSync, els.modalConfirm].forEach((m) => {
+              if (!m.classList.contains('hidden')) closeModal(m);
+            });
+          }
+        });
+      }
+
+      // -------------------- INITIALIZE APP --------------------
+      initTheme();
+      loadProducts();
+      bindEvents();
+      renderAll();
+    })();
+  </script>
+</body>
+</html>
