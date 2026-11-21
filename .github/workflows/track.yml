@@ -21,7 +21,7 @@ jobs:
           python-version: "3.11"
 
       - name: Install dependencies
-        run: pip install requests curl_
+        run: pip install requests curl_cffi
 
       - name: Run price tracker
         env:
