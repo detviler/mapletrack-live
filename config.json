@@ -1,0 +1,30 @@
+[
+  {
+    "id": "bb-mk-13-black",
+    "name": "Apple Magic Keyboard 13-inch iPad Pro (Refurbished)",
+    "retailer": "bestbuy_ca",
+    "sku": "19184599",
+    "targetPrice": 320.00
+  },
+  {
+    "id": "bb-mk-13-alt",
+    "name": "Apple Magic Keyboard 13-inch iPad Pro (Open Box)",
+    "retailer": "bestbuy_ca",
+    "sku": "18145549",
+    "targetPrice": 350.00
+  },
+  {
+    "id": "fb-sample",
+    "name": "FragranceBuy Sample",
+    "retailer": "fragrancebuy_ca",
+    "url": "https://fragrancebuy.ca/products/prada-lhomme-man",
+    "targetPrice": 110.00
+  },
+  {
+    "id": "uniqlo-sample",
+    "name": "Uniqlo Sample Item",
+    "retailer": "uniqlo_ca",
+    "productId": "E465185-000",
+    "targetPrice": 39.90
+  }
+]
