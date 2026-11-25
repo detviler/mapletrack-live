@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-25T02:58:53.295544+00:00",
+  "updatedAt": "2026-11-25T12:22:21.708415+00:00",
   "items": [
     {
       "id": "bb-mk-13-black",
@@ -10,7 +10,7 @@
       "targetPrice": 320.0,
       "inStock": false,
       "status": "ok",
-      "lastChecked": "2026-11-25T02:58:53.295544+00:00",
+      "lastChecked": "2026-11-25T12:22:21.708415+00:00",
       "history": [
         {
           "date": "2026-11-21T00:49:03.816314+00:00",
@@ -23,11 +23,11 @@
       "name": "Apple Magic Keyboard 13-inch iPad Pro (Open Box)",
       "retailer": "bestbuy_ca",
       "url": "https://www.bestbuy.ca/en-ca/product/18145549",
-      "currentPrice": 319.99,
+      "currentPrice": 329.99,
       "targetPrice": 350.0,
       "inStock": false,
       "status": "ok",
-      "lastChecked": "2026-11-25T02:58:53.295544+00:00",
+      "lastChecked": "2026-11-25T12:22:21.708415+00:00",
       "history": [
         {
           "date": "2026-11-21T00:49:03.816314+00:00",
@@ -44,6 +44,10 @@
         {
           "date": "2026-11-23T23:15:02.154650+00:00",
           "price": 319.99
+        },
+        {
+          "date": "2026-11-25T12:22:21.708415+00:00",
+          "price": 329.99
         }
       ]
     },
@@ -56,7 +60,7 @@
       "targetPrice": 110.0,
       "inStock": false,
       "status": "error: 403 Client Error: Forbidden for url: https://fragrancebuy.ca/products/prada-lhomme-man.json",
-      "lastChecked": "2026-11-25T02:58:53.295544+00:00",
+      "lastChecked": "2026-11-25T12:22:21.708415+00:00",
       "history": []
     },
     {
@@ -68,7 +72,7 @@
       "targetPrice": 59.9,
       "inStock": true,
       "status": "ok",
-      "lastChecked": "2026-11-25T02:58:53.295544+00:00",
+      "lastChecked": "2026-11-25T12:22:21.708415+00:00",
       "history": [
         {
           "date": "2026-11-21T03:32:57.016386+00:00",
